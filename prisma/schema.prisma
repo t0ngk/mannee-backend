@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  email           String
+  username        String          @unique
+  password        String
+  subscriptionsId String[]        @db.ObjectId
+  subscriptions   Subscription[]  @relation(references: [id], fields: [subscriptionsId])
+  billsId         String[]        @db.ObjectId
+  bills           Bill[]          @relation(references: [id], fields: [billsId])
+  friends         User[]          @relation("UserFriends", references: [id], fields: [friendsId])
+  friendsId       String[]        @db.ObjectId
+  friendOf        User[]          @relation("UserFriends", references: [id], fields: [friendOfId])
+  friendOfId      String[]        @db.ObjectId
+  friendRequest   User[]          @relation("UserFriendRequest", references: [id], fields: [friendRequestId])
+  friendRequestId String[]        @db.ObjectId
+  friendRequestOf User[]          @relation("UserFriendRequest", references: [id], fields: [friendRequestOfId])
+  friendRequestOfId String[]      @db.ObjectId
+}
+
+model Subscription {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  icon      String
+  currency  String
+  price     Float
+  name      String
+  color     String
+  firstBill DateTime
+  cycle     Cycle
+  cycleFreq Int
+  ownerId   String   @db.ObjectId
+  paidedId  String[] @db.ObjectId
+  userId    String[] @db.ObjectId
+  user      User[]   @relation(references: [id], fields: [userId])
+}
+
+model Bill {
+  id     String   @id @default(auto()) @map("_id") @db.ObjectId
+  name  String
+  color  String
+  items  Item[]
+  ownerId String   @db.ObjectId
+  userId String[] @db.ObjectId
+  user   User[]   @relation(references: [id], fields: [userId])
+  paidedId String[] @db.ObjectId
+}
+
+model Item {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  color    String
+  price    Float
+  peopleId String[] @db.ObjectId
+  Bill     Bill?    @relation(fields: [billId], references: [id])
+  billId   String?  @db.ObjectId
+}
+
+enum Cycle {
+  MONTHLY
+  YEARLY
+  WEEKLY
+  DAILY
+}

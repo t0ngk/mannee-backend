@@ -1,0 +1,84 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id String [pk]
+  email String [not null]
+  username String [unique, not null]
+  password String [not null]
+  subscriptionsId String[] [not null]
+  subscriptions Subscription [not null]
+  billsId String[] [not null]
+  bills Bill [not null]
+  friends User [not null]
+  friendsId String[] [not null]
+  friendOf User [not null]
+  friendOfId String[] [not null]
+  friendRequest User [not null]
+  friendRequestId String[] [not null]
+  friendRequestOf User [not null]
+  friendRequestOfId String[] [not null]
+}
+
+Table Subscription {
+  id String [pk]
+  icon String [not null]
+  currency String [not null]
+  price Float [not null]
+  name String [not null]
+  color String [not null]
+  firstBill DateTime [not null]
+  cycle Cycle [not null]
+  cycleFreq Int [not null]
+  ownerId String [not null]
+  paidedId String[] [not null]
+  userId String[] [not null]
+  user User [not null]
+}
+
+Table Bill {
+  id String [pk]
+  name String [not null]
+  color String [not null]
+  items Item [not null]
+  ownerId String [not null]
+  userId String[] [not null]
+  user User [not null]
+  paidedId String[] [not null]
+}
+
+Table Item {
+  id String [pk]
+  name String [not null]
+  color String [not null]
+  price Float [not null]
+  peopleId String[] [not null]
+  Bill Bill
+  billId String
+}
+
+Enum Cycle {
+  MONTHLY
+  YEARLY
+  WEEKLY
+  DAILY
+}
+
+Ref: User.subscriptionsId > Subscription.id
+
+Ref: User.billsId > Bill.id
+
+Ref: User.friendsId > User.id
+
+Ref: User.friendOfId > User.id
+
+Ref: User.friendRequestId > User.id
+
+Ref: User.friendRequestOfId > User.id
+
+Ref: Subscription.userId > User.id
+
+Ref: Bill.userId > User.id
+
+Ref: Item.billId > Bill.id
