@@ -5,7 +5,7 @@ import { Response, NextFunction } from "express";
 import { AuthRequest } from "../types/AuthRequest";
 
 const isLogin = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization.split(" ")[1];
+  const token = req.headers.authorization?.split(" ")[1];
   if (!token) {
     res.status(401).send("Token not found");
     return;
