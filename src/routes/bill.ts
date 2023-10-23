@@ -3,7 +3,7 @@ import isLogin from "../libs/middlewares/isLogin";
 import prisma from "../libs/prisma";
 import { z } from "zod";
 import { AuthRequest } from "../libs/types/AuthRequest";
-import isOwner from "../libs/middlewares/subscription/isOwner";
+import isOwner from "../libs/middlewares/bill/isOwner";
 
 const router = express.Router();
 
@@ -77,7 +77,7 @@ router.post("/new", isLogin, async (req: AuthRequest, res) => {
   res.json({ ...bill });
 });
 
-router.delete("/:id", isLogin, async (req: AuthRequest, res) => {
+router.delete("/:id", isLogin, isOwner ,async (req: AuthRequest, res) => {
   const id = req.params.id;
   const bill = await prisma.bill.delete({
     where: {
@@ -91,7 +91,7 @@ router.delete("/:id", isLogin, async (req: AuthRequest, res) => {
   res.json({ ...bill });
 });
 
-router.put("/:id", isLogin, async (req: AuthRequest, res) => {
+router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
   const id = req.params.id;
   const validated = newBillSchema.safeParse(req.body);
   if (!validated.success) {
@@ -134,7 +134,7 @@ router.put("/:id", isLogin, async (req: AuthRequest, res) => {
   res.json({ ...bill });
 });
 
-router.post("/:id/item/new" , isLogin, async (req: AuthRequest, res) => {
+router.post("/:id/item/new" , isLogin, isOwner, async (req: AuthRequest, res) => {
   const id = req.params.id;
   const validated = newItemSchema.safeParse(req.body);
   if (!validated.success) {

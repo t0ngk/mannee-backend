@@ -23,3 +23,5 @@ const isOwner = async (req: AuthRequest, res: Response, next: NextFunction) => {
   }
   next();
 };
+
+export default isOwner;
