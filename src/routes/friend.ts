@@ -229,4 +229,21 @@ router.post("/reject/:username", isLogin, async (req: AuthRequest, res) => {
   });
 });
 
+router.get("/search/:username", isLogin, async (req: AuthRequest, res) => {
+  const { username } = req.params;
+  const users = await prisma.user.findMany({
+    where: {
+      username: {
+        contains: username
+      }
+    },
+    select: {
+      username: true
+    }
+  });
+  res.json({
+    ...users
+  });
+});
+
 export default router;
