@@ -27,7 +27,7 @@ router.get("/", isLogin, async (req: AuthRequest, res) => {
       bills: true,
     },
   });
-  res.json({ ...user.bills });
+  res.json(user.bills);
 });
 
 router.get("/:id", isLogin, async (req: AuthRequest, res) => {
@@ -48,7 +48,7 @@ router.get("/:id", isLogin, async (req: AuthRequest, res) => {
     res.status(404).json({ message: "Bill not found" });
     return;
   }
-  res.json({ ...user.bills[0] });
+  res.json(user.bills[0]);
 });
 
 router.post("/new", isLogin, async (req: AuthRequest, res) => {
@@ -74,7 +74,7 @@ router.post("/new", isLogin, async (req: AuthRequest, res) => {
     res.status(500).json({ message: "Internal server error" });
     return;
   }
-  res.json({ ...bill });
+  res.json(bill);
 });
 
 router.delete("/:id", isLogin, isOwner ,async (req: AuthRequest, res) => {

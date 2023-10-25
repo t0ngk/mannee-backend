@@ -27,7 +27,8 @@ router.get("/", isLogin, async (req: AuthRequest, res) => {
       subscriptions: true,
     },
   });
-  res.json({ ...user.subscriptions });
+  console.log(user.subscriptions)
+  res.json(user.subscriptions);
 });
 
 router.get("/:id", isLogin, async (req: AuthRequest, res) => {
@@ -48,7 +49,7 @@ router.get("/:id", isLogin, async (req: AuthRequest, res) => {
     res.status(404).json({ message: "Subscription not found" });
     return;
   }
-  res.json({ ...user.subscriptions[0] });
+  res.json(user.subscriptions[0]);
 });
 
 router.post("/new", isLogin, async (req: AuthRequest, res) => {
