@@ -28,7 +28,7 @@ Table Subscription {
   price Float [not null]
   name String [not null]
   color String [not null]
-  firstBill DateTime [not null]
+  firstBill String [not null]
   cycle Cycle [not null]
   cycleFreq Int [not null]
   ownerId String [not null]

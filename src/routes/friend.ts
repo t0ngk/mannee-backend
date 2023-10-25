@@ -13,12 +13,12 @@ router.get("/", isLogin, async (req: AuthRequest, res) => {
       friends: {
         select: {
           id: true,
-          username: true
-        }
-      }
-    }
+          username: true,
+        },
+      },
+    },
   });
-  res.json({ ...user.friends });
+  res.json(user.friends);
 });
 
 router.get("/request", isLogin, async (req: AuthRequest, res) => {
@@ -30,12 +30,12 @@ router.get("/request", isLogin, async (req: AuthRequest, res) => {
       friendRequestOf: {
         select: {
           id: true,
-          username: true
-        }
-      }
-    }
+          username: true,
+        },
+      },
+    },
   });
-  res.json({ ...user.friendRequestOf });
+  res.json(user.friendRequestOf);
 });
 
 router.post("/add/:username", isLogin, async (req: AuthRequest, res) => {
@@ -47,40 +47,40 @@ router.post("/add/:username", isLogin, async (req: AuthRequest, res) => {
     select: {
       friends: {
         select: {
-          username: true
-        }
-      }
-    }
+          username: true,
+        },
+      },
+    },
   });
   const friend = await prisma.user.findUnique({
     where: {
-      username
-    }
+      username,
+    },
   });
   if (!friend) {
     return res.status(404).json({
-      message: "User not found"
+      message: "User not found",
     });
   }
   if (user.friends.find((f) => f.username === username)) {
     return res.status(400).json({
-      message: "User already in your friend list"
+      message: "User already in your friend list",
     });
   }
   await prisma.user.update({
     where: {
-      username: req.user.username
+      username: req.user.username,
     },
     data: {
       friendRequest: {
         connect: {
-          username
-        }
-      }
-    }
+          username,
+        },
+      },
+    },
   });
   res.json({
-    message: "Friend added"
+    message: "Friend added",
   });
 });
 
@@ -93,81 +93,81 @@ router.post("/accept/:username", isLogin, async (req: AuthRequest, res) => {
     select: {
       friendRequestOf: {
         select: {
-          username: true
-        }
-      }
-    }
+          username: true,
+        },
+      },
+    },
   });
   const friend = await prisma.user.findUnique({
     where: {
-      username
-    }
+      username,
+    },
   });
   if (!friend) {
     return res.status(404).json({
-      message: "User not found"
+      message: "User not found",
     });
   }
   if (!user.friendRequestOf.find((f) => f.username === username)) {
     return res.status(400).json({
-      message: "User not in your friend request list"
+      message: "User not in your friend request list",
     });
   }
   await prisma.user.update({
     where: {
-      username: req.user.username
+      username: req.user.username,
     },
     data: {
       friends: {
         connect: {
-          username
-        }
+          username,
+        },
       },
       friendRequestOf: {
         disconnect: {
-          username
-        }
-      }
-    }
+          username,
+        },
+      },
+    },
   });
   await prisma.user.update({
     where: {
-      username
+      username,
     },
     data: {
       friends: {
         connect: {
-          username: req.user.username
-        }
-      }
-    }
+          username: req.user.username,
+        },
+      },
+    },
   });
   await prisma.user.update({
     where: {
-      username
+      username,
     },
     data: {
       friendRequest: {
         disconnect: {
-          username: req.user.username
-        }
-      }
-    }
+          username: req.user.username,
+        },
+      },
+    },
   });
   await prisma.user.update({
     where: {
-      username: req.user.username
+      username: req.user.username,
     },
     data: {
       friendRequestOf: {
         disconnect: {
-          username
-        }
-      }
-    }
+          username,
+        },
+      },
+    },
   });
   res.json({
-    message: "Friend accepted"
+    message: "Friend accepted",
   });
 });
 
@@ -180,52 +180,52 @@ router.post("/reject/:username", isLogin, async (req: AuthRequest, res) => {
     select: {
       friendRequestOf: {
         select: {
-          username: true
-        }
-      }
-    }
+          username: true,
+        },
+      },
+    },
   });
   const friend = await prisma.user.findUnique({
     where: {
-      username
-    }
+      username,
+    },
   });
   if (!friend) {
     return res.status(404).json({
-      message: "User not found"
+      message: "User not found",
     });
   }
   if (!user.friendRequestOf.find((f) => f.username === username)) {
     return res.status(400).json({
-      message: "User not in your friend request list"
+      message: "User not in your friend request list",
     });
   }
   await prisma.user.update({
     where: {
-      username: req.user.username
+      username: req.user.username,
     },
     data: {
       friendRequestOf: {
         disconnect: {
-          username
-        }
-      }
-    }
+          username,
+        },
+      },
+    },
   });
   await prisma.user.update({
     where: {
-      username
+      username,
     },
     data: {
       friendRequest: {
         disconnect: {
-          username: req.user.username
-        }
-      }
-    }
+          username: req.user.username,
+        },
+      },
+    },
   });
   res.json({
-    message: "Friend rejected"
+    message: "Friend rejected",
   });
 });
 
@@ -234,16 +234,14 @@ router.get("/search/:username", isLogin, async (req: AuthRequest, res) => {
   const users = await prisma.user.findMany({
     where: {
       username: {
-        contains: username
-      }
+        contains: username,
+      },
     },
     select: {
-      username: true
-    }
+      username: true,
+    },
   });
-  res.json({
-    ...users
-  });
+  res.json(users);
 });
 
 export default router;

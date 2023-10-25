@@ -13,7 +13,7 @@ const newSubscriptionSchema = z.object({
   price: z.number(),
   name: z.string(),
   color: z.string(),
-  firstBill: z.date(),
+  firstBill: z.string(),
   cycle: z.enum(["MONTHLY", "YEARLY", "WEEKLY", "DAILY"]),
   cycleFreq: z.number(),
 });
@@ -53,7 +53,6 @@ router.get("/:id", isLogin, async (req: AuthRequest, res) => {
 });
 
 router.post("/new", isLogin, async (req: AuthRequest, res) => {
-  req.body.firstBill = new Date(req.body.firstBill);
   const validated = newSubscriptionSchema.safeParse(req.body);
   if (!validated.success) {
     res.status(400).json({ message: "Invalid body" });
@@ -108,7 +107,6 @@ router.post("/new", isLogin, async (req: AuthRequest, res) => {
 
 router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
   const id = req.params.id;
-  req.body.firstBill = new Date(req.body.firstBill);
   const validated = newSubscriptionSchema.safeParse(req.body);
   if (!validated.success) {
     res.status(400).json({ message: "Invalid body" });

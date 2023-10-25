@@ -40,7 +40,7 @@ model Subscription {
   price     Float
   name      String
   color     String
-  firstBill DateTime
+  firstBill String
   cycle     Cycle
   cycleFreq Int
   ownerId   String   @db.ObjectId

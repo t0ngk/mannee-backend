@@ -88,7 +88,7 @@ router.delete("/:id", isLogin, isOwner ,async (req: AuthRequest, res) => {
     res.status(404).json({ message: "Bill not found" });
     return;
   }
-  res.json({ ...bill });
+  res.json(bill);
 });
 
 router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
@@ -131,7 +131,7 @@ router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
     res.status(404).json({ message: "Bill not found" });
     return;
   }
-  res.json({ ...bill });
+  res.json(bill);
 });
 
 router.post("/:id/item/new" , isLogin, isOwner, async (req: AuthRequest, res) => {
@@ -160,7 +160,7 @@ router.post("/:id/item/new" , isLogin, isOwner, async (req: AuthRequest, res) =>
     res.status(500).json({ message: "Internal server error" });
     return;
   }
-  res.json({ ...item });
+  res.json(item);
 });
 
 router.delete("/:id/item/:itemId", isLogin, isOwner, async (req: AuthRequest, res) => {
@@ -174,7 +174,7 @@ router.delete("/:id/item/:itemId", isLogin, isOwner, async (req: AuthRequest, re
     res.status(404).json({ message: "Item not found" });
     return;
   }
-  res.json({ ...item });
+  res.json(item);
 });
 
 router.put("/:id/item/:itemId", isLogin, isOwner, async (req: AuthRequest, res) => {
@@ -200,7 +200,7 @@ router.put("/:id/item/:itemId", isLogin, isOwner, async (req: AuthRequest, res) 
     res.status(404).json({ message: "Item not found" });
     return;
   }
-  res.json({ ...item });
+  res.json(item);
 });
 
 
