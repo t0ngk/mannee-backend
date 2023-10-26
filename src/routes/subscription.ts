@@ -19,16 +19,31 @@ const newSubscriptionSchema = z.object({
 });
 
 router.get("/", isLogin, async (req: AuthRequest, res) => {
-  const user = await prisma.user.findUnique({
+  // const user = await prisma.user.findUnique({
+  //   where: {
+  //     username: req.user.username,
+  //   },
+  //   select: {
+  //     subscriptions: true,
+  //   },
+  // });
+  const subscriptions = await prisma.subscription.findMany({
     where: {
-      username: req.user.username,
+      userId: {
+        has: req.user.id,
+      },
     },
-    select: {
-      subscriptions: true,
+    include: {
+      user: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
     },
   });
-  console.log(user.subscriptions)
-  res.json(user.subscriptions);
+  console.log(subscriptions);
+  res.json(subscriptions);
 });
 
 router.get("/:id", isLogin, async (req: AuthRequest, res) => {
@@ -117,9 +132,11 @@ router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
   const reqMember: string[] | null = req.body.member;
   const member: {
     id: string;
-  }[] = [{
-    id: req.user.id,
-  }];
+  }[] = [
+    {
+      id: req.user.id,
+    },
+  ];
   if (reqMember && reqMember.length > 0) {
     reqMember.forEach((id) => {
       member.push({
@@ -158,6 +175,49 @@ router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
     return;
   }
 });
+
+router.put(
+  "/:id/paid/:userId",
+  isLogin,
+  isOwner,
+  async (req: AuthRequest, res) => {
+    const id = req.params.id;
+    const userId = req.params.userId;
+    try {
+      const subscription = await prisma.subscription.findFirst({
+        where: {
+          id: id,
+          userId: {
+            has: userId,
+          },
+        },
+      });
+      const { paidedId } = subscription;
+      const isPaided = paidedId.includes(userId);
+      const newPaidedId = isPaided
+        ? paidedId.filter((id) => id !== userId)
+        : [...paidedId, userId];
+      const newSubscription = await prisma.subscription.update({
+        where: {
+          id: id,
+        },
+        data: {
+          paidedId: newPaidedId,
+        },
+      });
+      if (!newSubscription) {
+        res.status(500).json({ message: "Failed to update subscription" });
+        return;
+      }
+      res.json({
+        ...newSubscription,
+      });
+    } catch (e) {
+      res.status(500).json({ message: "Failed to update subscription" });
+      return;
+    }
+  }
+);
 
 router.delete("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
   const id = req.params.id;

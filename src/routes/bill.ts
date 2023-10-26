@@ -19,15 +19,17 @@ const newItemSchema = z.object({
 });
 
 router.get("/", isLogin, async (req: AuthRequest, res) => {
-  const user = await prisma.user.findUnique({
+  const bills = await prisma.bill.findMany({
     where: {
-      username: req.user.username,
+      userId: {
+        has: req.user.id,
+      },
     },
-    select: {
-      bills: true,
-    },
+    include: {
+      items: true
+    }
   });
-  res.json(user.bills);
+  res.json(bills);
 });
 
 router.get("/:id", isLogin, async (req: AuthRequest, res) => {
