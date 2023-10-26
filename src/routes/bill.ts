@@ -51,6 +51,7 @@ router.get("/:id", isLogin, async (req: AuthRequest, res) => {
       }
     },
   });
+  console.log(bill);
   if (!bill) {
     res.status(404).json({ message: "Bill not found" });
     return;
@@ -139,6 +140,42 @@ router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
     return;
   }
   res.json(bill);
+});
+
+router.put("/:id/paid/:userId", isLogin, isOwner, async (req: AuthRequest, res) => {
+  const id = req.params.id;
+  const userId = req.params.userId;
+  try {
+    const bill = await prisma.bill.findFirst({
+      where: {
+        id:id,
+        userId: {
+          has: userId
+        }
+      }
+    })
+    const {paidedId} = bill
+    const isPaided = paidedId.includes(userId)
+    const newPaidedId = isPaided ? paidedId.filter((id) => id !== userId) : [...paidedId, userId]
+    const updatedBill = await prisma.bill.update({
+      where: {
+        id:id
+      },
+      data: {
+        paidedId: newPaidedId
+      }
+    })
+    if (!updatedBill) {
+      res.status(500).json({ message: "Failed to update subscription" });
+      return;
+    }
+    res.json({
+      ...updatedBill,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update subscription" });
+    return;
+  }
 });
 
 router.post(

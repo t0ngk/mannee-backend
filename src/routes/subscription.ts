@@ -162,6 +162,14 @@ router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
           set: member,
         },
       },
+      include: {
+        user: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      }
     });
     if (!subscription) {
       res.status(500).json({ message: "Failed to update subscription" });
@@ -175,6 +183,35 @@ router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
     return;
   }
 });
+
+router.put("/:id/uncheckAll", isLogin, isOwner, async (req: AuthRequest, res) => {
+  const id = req.params.id;
+  const exit = await prisma.subscription.findFirst({
+    where: {
+      id:id
+    }
+  })
+  if (!exit) {
+    console.log("exit")
+    res.status(404).json({ message: "Subscription not found" });
+    return;
+  }
+  const subscription = await prisma.subscription.update({
+    where: {
+      id:id
+    },
+    data: {
+      paidedId: []
+    }
+  })
+  if (!subscription) {
+    res.status(500).json({ message: "Failed to update subscription" });
+    return;
+  }
+  res.json({
+    ...subscription,
+  });
+})
 
 router.put(
   "/:id/paid/:userId",
