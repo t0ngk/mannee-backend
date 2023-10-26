@@ -26,31 +26,36 @@ router.get("/", isLogin, async (req: AuthRequest, res) => {
       },
     },
     include: {
-      items: true
-    }
+      items: true,
+    },
   });
   res.json(bills);
 });
 
 router.get("/:id", isLogin, async (req: AuthRequest, res) => {
   const id = req.params.id;
-  const user = await prisma.user.findUnique({
+  const bill = await prisma.bill.findFirst({
     where: {
-      username: req.user.username,
-    },
-    select: {
-      bills: {
-        where: {
-          id: id,
-        },
+      id: id,
+      userId: {
+        has: req.user.id,
       },
     },
+    include: {
+      items: true,
+      user: {
+        select: {
+          id: true,
+          username: true,
+        }
+      }
+    },
   });
-  if (!user) {
+  if (!bill) {
     res.status(404).json({ message: "Bill not found" });
     return;
   }
-  res.json(user.bills[0]);
+  res.json(bill);
 });
 
 router.post("/new", isLogin, async (req: AuthRequest, res) => {
@@ -79,7 +84,7 @@ router.post("/new", isLogin, async (req: AuthRequest, res) => {
   res.json(bill);
 });
 
-router.delete("/:id", isLogin, isOwner ,async (req: AuthRequest, res) => {
+router.delete("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
   const id = req.params.id;
   const bill = await prisma.bill.delete({
     where: {
@@ -136,75 +141,88 @@ router.put("/:id", isLogin, isOwner, async (req: AuthRequest, res) => {
   res.json(bill);
 });
 
-router.post("/:id/item/new" , isLogin, isOwner, async (req: AuthRequest, res) => {
-  const id = req.params.id;
-  const validated = newItemSchema.safeParse(req.body);
-  if (!validated.success) {
-    res.status(400).json({ message: "Invalid body" });
-    return;
-  }
-  const { name, price, color, peopleId } = req.body;
+router.post(
+  "/:id/item/new",
+  isLogin,
+  isOwner,
+  async (req: AuthRequest, res) => {
+    const id = req.params.id;
+    const validated = newItemSchema.safeParse(req.body);
+    if (!validated.success) {
+      res.status(400).json({ message: "Invalid body" });
+      return;
+    }
+    const { name, price, color, peopleId } = req.body;
 
-  const item = await prisma.item.create({
-    data: {
-      name,
-      price,
-      color,
-      peopleId,
-      Bill: {
-        connect: {
-          id: id,
+    const item = await prisma.item.create({
+      data: {
+        name,
+        price,
+        color,
+        peopleId,
+        Bill: {
+          connect: {
+            id: id,
+          },
         },
       },
-    },
-  });
-  if (!item) {
-    res.status(500).json({ message: "Internal server error" });
-    return;
+    });
+    if (!item) {
+      res.status(500).json({ message: "Internal server error" });
+      return;
+    }
+    res.json(item);
   }
-  res.json(item);
-});
+);
 
-router.delete("/:id/item/:itemId", isLogin, isOwner, async (req: AuthRequest, res) => {
-  const itemId = req.params.itemId;
-  const item = await prisma.item.delete({
-    where: {
-      id: itemId,
-    },
-  });
-  if (!item) {
-    res.status(404).json({ message: "Item not found" });
-    return;
+router.delete(
+  "/:id/item/:itemId",
+  isLogin,
+  isOwner,
+  async (req: AuthRequest, res) => {
+    const itemId = req.params.itemId;
+    const item = await prisma.item.delete({
+      where: {
+        id: itemId,
+      },
+    });
+    if (!item) {
+      res.status(404).json({ message: "Item not found" });
+      return;
+    }
+    res.json(item);
   }
-  res.json(item);
-});
+);
 
-router.put("/:id/item/:itemId", isLogin, isOwner, async (req: AuthRequest, res) => {
-  const itemId = req.params.itemId;
-  const validated = newItemSchema.safeParse(req.body);
-  if (!validated.success) {
-    res.status(400).json({ message: "Invalid body" });
-    return;
+router.put(
+  "/:id/item/:itemId",
+  isLogin,
+  isOwner,
+  async (req: AuthRequest, res) => {
+    const itemId = req.params.itemId;
+    const validated = newItemSchema.safeParse(req.body);
+    if (!validated.success) {
+      res.status(400).json({ message: "Invalid body" });
+      return;
+    }
+    const { name, price, color, peopleId } = req.body;
+    const item = await prisma.item.update({
+      where: {
+        id: itemId,
+      },
+      data: {
+        name,
+        price,
+        color,
+        peopleId,
+      },
+    });
+    if (!item) {
+      res.status(404).json({ message: "Item not found" });
+      return;
+    }
+    res.json(item);
   }
-  const { name, price, color, peopleId } = req.body;
-  const item = await prisma.item.update({
-    where: {
-      id: itemId,
-    },
-    data: {
-      name,
-      price,
-      color,
-      peopleId,
-    },
-  });
-  if (!item) {
-    res.status(404).json({ message: "Item not found" });
-    return;
-  }
-  res.json(item);
-});
-
-
+);
 
 export default router;
